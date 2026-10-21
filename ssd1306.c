@@ -145,7 +145,7 @@ void SSD1306_DrawChessBoard(void) {
             uint8_t squareX = x / squareSize;
             uint8_t squareY = y / squareSize;
             
-            if ((squareX + squareY) % 2 == 0 && squareCounter < 64 * 64) {
+            if ((squareX + squareY) % 2 == 0 && squareCounter < 64 * squareSize * squareSize) {
                 SSD1306_DrawPixel(x, y, 1);
                 squareCounter++;
             } else {
