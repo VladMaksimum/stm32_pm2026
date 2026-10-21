@@ -1,19 +1,19 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
-# Правильный способ отключить проверку для встраиваемых систем
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(CMAKE_C_COMPILER_WORKS 1)
 
-# ЯВНО УКАЗЫВАЕМ, ЧТО ПРОЕКТ ТОЛЬКО НА C
-project(stm32_template C)  # <--- ВАЖНО: добавлено "C"
+set(ARM_TOOLCHAIN_PATH $ENV{ARM_TOOLCHAIN_PATH})
+set(CMAKE_C_COMPILER ${ARM_TOOLCHAIN_PATH}arm-none-eabi-gcc)
+
+project(stm32_template C)
 
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 
 set(TARGET_NAME ${PROJECT_NAME})
 
-# Указываем компиляторы (они должны быть в PATH)
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-set(OBJCOPY arm-none-eabi-objcopy)
+set(OBJCOPY ${ARM_TOOLCHAIN_PATH}arm-none-eabi-objcopy)
 set(STFLASH st-flash)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -38,23 +38,15 @@ add_definitions(-DSTM32F10X_MD)
 
 include_directories(cmsis)
 include_directories(stm32)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SOURCE_FILES
     stm32/startup/startup_stm32f10x_md.c
     stm32/system_stm32f10x.c
     syscalls/syscalls.c
+    spi.c
+    ssd1306.c
     main.c)
-
-# Проверяем наличие .gdbinit и создаем если нет
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.gdbinit")
-    file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/.gdbinit" 
-        "target remote localhost:3333\n"
-        "monitor reset halt\n"
-        "load\n"
-        "monitor reset\n"
-    )
-    message(STATUS "Created default .gdbinit file")
-endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.gdbinit DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
